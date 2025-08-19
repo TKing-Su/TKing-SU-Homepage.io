@@ -518,26 +518,21 @@
 
     
     
-    // Like button feature (CountAPI-backed, global across visitors, optimistic UI)
+    // Like button feature (CountAPI-backed, global across visitors, robust init + local fallback)
     const likeBtn = document.getElementById('like-btn');
     const likeCount = document.getElementById('like-count');
     if (!likeBtn || !likeCount) {
       console.warn('[like] required elements not found');
     } else {
-      const NS = 'tkingsu-homepage';  // customize as you like
-      const KEY = 'likes';
+      const NS = 'tkingsu-homepage';  // ← customize
+      const KEY = 'likes';            // ← customize
       let liked = localStorage.getItem('liked') === 'true';
       const fmt = (n) => (typeof n === 'number' ? n.toLocaleString() : '0');
-      const parseCount = () => {
-        const t = (likeCount.textContent || '0').replace(/[^0-9]/g, '');
-        const n = parseInt(t || '0', 10);
-        return Number.isFinite(n) ? n : 0;
-      };
-      function setLikedUI(on){
+      const setLikedUI = (on) => {
         likeBtn.classList.toggle('btn--liked', on);
         likeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      }
-      function spawnBubble(text){
+      };
+      const spawnBubble = (text) => {
         const b = document.createElement('span');
         b.className = 'like-bubble';
         b.textContent = text;
@@ -545,47 +540,74 @@
         const remove = () => b.remove();
         b.addEventListener('animationend', remove);
         setTimeout(remove, 900);
-      }
-      async function api(path){
-        const url = `https://api.countapi.xyz/${path}?_=${Date.now()}`; // cache-busting
+      };
+      const api = async (path) => {
+        const url = `https://api.countapi.xyz/${path}?_=${Date.now()}`; // cache bust
         const r = await fetch(url, { cache: 'no-store', mode: 'cors' });
+        if(!r.ok) throw Object.assign(new Error('bad response'), {status: r.status});
         return r.json();
-      }
-      async function initCounter(){
-        try{
-          // Ensure key exists (ignore result), then get
-          await api(`create?namespace=${encodeURIComponent(NS)}&key=${encodeURIComponent(KEY)}&value=0`);
+      };
+      const getGlobal = async () => {
+        try {
           const d = await api(`get/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`);
-          likeCount.textContent = fmt(typeof d.value === 'number' ? d.value : 0);
-        }catch(err){
-          console.error('[like] init failed:', err);
-          // keep whatever is rendered
+          return (typeof d.value === 'number') ? d.value : 0;
+        } catch(e) {
+          if(e.status === 404) {
+            // create then get
+            await api(`create?namespace=${encodeURIComponent(NS)}&key=${encodeURIComponent(KEY)}&value=0`);
+            const d = await api(`get/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`);
+            return (typeof d.value === 'number') ? d.value : 0;
+          }
+          throw e;
         }
-        setLikedUI(liked);
-      }
+      };
+
+      // ① 首屏用本地缓存的最后一次全局值，避免看到 0
+      const last = parseInt(localStorage.getItem('like-last') || '0', 10);
+      if(Number.isFinite(last) && last > 0){ likeCount.textContent = fmt(last); }
+
+      // ② 拉取最新全局值并刷新显示
+      (async () => {
+        try{
+          const v = await getGlobal();
+          likeCount.textContent = fmt(v);
+          localStorage.setItem('like-last', String(v));
+        }catch(err){
+          console.warn('[like] get failed:', err);
+          // 保持现状；若没有缓存则显示 0
+        }finally{
+          setLikedUI(liked);
+        }
+      })();
+
       likeBtn.addEventListener('click', async () => {
         if(!liked){
-          // optimistic UI +1
           liked = true;
           setLikedUI(true);
           spawnBubble('+1');
           localStorage.setItem('liked','true');
-          likeCount.textContent = fmt(parseCount() + 1);
+          // 乐观更新：本地 +1 并写入缓存
+          const cur = parseInt((likeCount.textContent || '0').replace(/[^0-9]/g, ''), 10) || 0;
+          const optimistic = cur + 1;
+          likeCount.textContent = fmt(optimistic);
+          localStorage.setItem('like-last', String(optimistic));
           try{
             const d = await api(`hit/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`);
-            if(typeof d.value === 'number'){ likeCount.textContent = fmt(d.value); }
+            if(typeof d.value === 'number'){
+              likeCount.textContent = fmt(d.value);
+              localStorage.setItem('like-last', String(d.value));
+            }
           }catch(err){
-            console.error('[like] hit failed:', err);
+            console.warn('[like] hit failed:', err);
           }
         }else{
-          // toggle off locally only
           liked = false;
           setLikedUI(false);
           spawnBubble('-1');
           localStorage.setItem('liked','false');
+          // 不对全局数减 1；仅重绘本地状态即可
         }
       });
-      initCounter();
     }
 
     // --- Generic carousel factory to reduce duplicate code ---
