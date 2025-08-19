@@ -517,34 +517,76 @@
     sections.forEach(sec => io.observe(sec));
 
     
-    // Like button feature
+    
+    // Like button feature (CountAPI-backed, global across visitors, optimistic UI)
     const likeBtn = document.getElementById('like-btn');
     const likeCount = document.getElementById('like-count');
-    let count = parseInt(localStorage.getItem('like-count') || '0', 10);
-    let liked = localStorage.getItem('liked') === 'true';
-    likeCount.textContent = count;
-    if(liked){ likeBtn.classList.add('btn--liked'); likeBtn.setAttribute('aria-pressed','true'); }
-
-    function spawnBubble(text){
-      const b = document.createElement('span');
-      b.className = 'like-bubble';
-      b.textContent = text;
-      likeBtn.appendChild(b);
-      const remove = () => b.remove();
-      b.addEventListener('animationend', remove);
-      setTimeout(remove, 900);
+    if (!likeBtn || !likeCount) {
+      console.warn('[like] required elements not found');
+    } else {
+      const NS = 'tkingsu-homepage';  // customize as you like
+      const KEY = 'likes';
+      let liked = localStorage.getItem('liked') === 'true';
+      const fmt = (n) => (typeof n === 'number' ? n.toLocaleString() : '0');
+      const parseCount = () => {
+        const t = (likeCount.textContent || '0').replace(/[^0-9]/g, '');
+        const n = parseInt(t || '0', 10);
+        return Number.isFinite(n) ? n : 0;
+      };
+      function setLikedUI(on){
+        likeBtn.classList.toggle('btn--liked', on);
+        likeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      function spawnBubble(text){
+        const b = document.createElement('span');
+        b.className = 'like-bubble';
+        b.textContent = text;
+        likeBtn.appendChild(b);
+        const remove = () => b.remove();
+        b.addEventListener('animationend', remove);
+        setTimeout(remove, 900);
+      }
+      async function api(path){
+        const url = `https://api.countapi.xyz/${path}?_=${Date.now()}`; // cache-busting
+        const r = await fetch(url, { cache: 'no-store', mode: 'cors' });
+        return r.json();
+      }
+      async function initCounter(){
+        try{
+          // Ensure key exists (ignore result), then get
+          await api(`create?namespace=${encodeURIComponent(NS)}&key=${encodeURIComponent(KEY)}&value=0`);
+          const d = await api(`get/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`);
+          likeCount.textContent = fmt(typeof d.value === 'number' ? d.value : 0);
+        }catch(err){
+          console.error('[like] init failed:', err);
+          // keep whatever is rendered
+        }
+        setLikedUI(liked);
+      }
+      likeBtn.addEventListener('click', async () => {
+        if(!liked){
+          // optimistic UI +1
+          liked = true;
+          setLikedUI(true);
+          spawnBubble('+1');
+          localStorage.setItem('liked','true');
+          likeCount.textContent = fmt(parseCount() + 1);
+          try{
+            const d = await api(`hit/${encodeURIComponent(NS)}/${encodeURIComponent(KEY)}`);
+            if(typeof d.value === 'number'){ likeCount.textContent = fmt(d.value); }
+          }catch(err){
+            console.error('[like] hit failed:', err);
+          }
+        }else{
+          // toggle off locally only
+          liked = false;
+          setLikedUI(false);
+          spawnBubble('-1');
+          localStorage.setItem('liked','false');
+        }
+      });
+      initCounter();
     }
-
-    likeBtn.addEventListener('click', () => {
-      liked = !liked;
-      likeBtn.classList.toggle('btn--liked', liked);
-      likeBtn.setAttribute('aria-pressed', liked ? 'true' : 'false');
-      if(liked){ count += 1; spawnBubble('+1'); }
-      else { count = Math.max(0, count - 1); spawnBubble('-1'); }
-      likeCount.textContent = count;
-      localStorage.setItem('like-count', String(count));
-      localStorage.setItem('liked', liked ? 'true' : 'false');
-    });
 
     // --- Generic carousel factory to reduce duplicate code ---
     function setupCarousel({viewportId, trackId, prevId, nextId, counterId, total, path, prefix, ext, startIndex=1, orientationByIndex}){
