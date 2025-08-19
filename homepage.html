@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Academic homepage of Zibo Su | 个人学术主页" />
+  <meta name="author" content="Zibo Su" />
+  <meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
+  <link rel="canonical" href="./" />
+  <title>苏子博 · 个人学术主页 | Zibo Su · Academic Homepage</title>
+
+  <!-- Icons & Fonts -->
+  <link rel="icon" type="image/x-icon" href="static/assets/optic.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Base styles -->
+  <style>
+    /* --- CSS Variables & Resets --- */
+    :root{
+      --bg: #ffffff;
+      --bg-soft: #fafafa;
+      --text: #18181b;
+      --muted: #6b7280;
+      --primary: #0f766e;
+      --primary-weak: #14b8a6;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --shadow: 0 6px 20px rgba(0,0,0,.06);
+      --code-bg: #f6f8fa;
+      --radius: 16px;
+      --focus: 2px solid #14b8a6;
+      color-scheme: light;
+    }
+    [data-theme="dark"]{
+      --bg: #0b0f14;
+      --bg-soft: #0f1520;
+      --text: #e5e7eb;
+      --muted: #9aa4b2;
+      --primary: #22d3ee;
+      --primary-weak: #67e8f9;
+      --card: #111827;
+      --border: #1f2937;
+      --shadow: 0 6px 20px rgba(0,0,0,.35);
+      --code-bg: #0b1220;
+      color-scheme: dark;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    :focus-visible{outline: var(--focus);outline-offset: 2px}
+    .container{max-width:1100px;margin:0 auto;padding:0 20px}
+
+    h1,h2,h3{line-height:1.2;margin:0 0 .6rem}
+    h1{font-size: clamp(2rem, 3.5vw, 3rem);font-weight: 800}
+    h2{font-size: clamp(1.35rem, 2.2vw, 1.9rem);font-weight: 700}
+    h3{font-size: clamp(1.1rem,1.6vw,1.35rem);font-weight: 700}
+    p{margin:.5rem 0}
+    a{color:var(--primary);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* --- Top Nav --- */
+    .skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip-link:focus{position:fixed;left:12px;top:12px;width:auto;height:auto;padding:.5rem .75rem;background:var(--card);border:1px solid var(--border);border-radius:10px;z-index:9999}
+    .nav{
+      position: sticky; top:0; z-index: 50; backdrop-filter: saturate(150%) blur(10px);
+      background: color-mix(in lab, var(--bg) 86%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;min-height:64px}
+    .brand{display:flex;align-items:center;gap:.75rem;font-weight:700}
+    .brand .avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border)}
+    .nav-links{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
+    .nav-links a{padding:.35rem .55rem;border-radius:10px}
+    .nav-links a.active{background: color-mix(in lab, var(--primary-weak) 18%, transparent);text-decoration:none}
+    .chip{font-size:.85rem;padding:.25rem .6rem;border:1px solid var(--border);border-radius:999px;color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem .85rem;border:1px solid var(--border);border-radius:12px;background:var(--card);box-shadow:var(--shadow);font-weight:600}
+    .btn:hover{transform:translateY(-1px);transition:.2s ease}
+    /* Like button enhanced styles */
+    .btn.like{border-color: color-mix(in lab, var(--primary) 35%, var(--border)); position: relative; overflow: visible;}
+    .btn.like:hover{background: color-mix(in lab, var(--primary) 10%, var(--card)); transform: translateY(-2px);}
+    .btn.like i{transition: transform .25s ease; font-size: 1.1rem; line-height: 1;}
+    .btn.like.btn--liked{
+      background: color-mix(in lab, var(--primary) 20%, var(--card));
+      border-color: var(--primary);
+      color: var(--text);
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    }
+    .btn.like.btn--liked i{animation: pop .45s ease}
+    @keyframes pop{ 0%{transform:scale(1)} 35%{transform:scale(1.25)} 100%{transform:scale(1)} }
+    @media (prefers-reduced-motion: reduce){
+      .btn.like i{transition:none}
+      .btn.like.btn--liked i{animation:none}
+    }
+    /* Like button bubble & layout tweaks */
+    .aside #like-btn{ margin-top: 32px !important; align-self:stretch; width:100%; }
+    .like-bubble{
+      position:absolute;
+      left:50%;
+      bottom: calc(100% - 2px);
+      transform: translateX(-50%);
+      font-weight:700;
+      pointer-events:none;
+      opacity:0;
+      animation: like-float .7s ease forwards;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.2));
+    }
+    @keyframes like-float{
+      0%{ transform: translate(-50%, 6px) scale(.9); opacity: 0; }
+      20%{ opacity:1; }
+      80%{ opacity:1; }
+      100%{ transform: translate(-50%, -28px) scale(1.1); opacity:0; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .like-bubble{ animation: none; opacity:1; }
+    }
+
+
+    /* --- Layout --- */
+    .hero{padding:54px 0;background: linear-gradient(180deg, var(--bg-soft), transparent 50%)}
+    .grid{display:grid;grid-template-columns: 320px 1fr;gap:28px;align-items:start}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+    .aside .photo{width:168px;height:168px;border-radius:50%;object-fit:cover;border:1px solid var(--border);box-shadow:var(--shadow)}
+    .meta{margin-top:10px;color:var(--muted);font-size:.95rem}
+    .list-unstyled{list-style:none;padding:0;margin:0}
+    .kv{display:flex;gap:.6rem;align-items:flex-start}
+    .kv i{margin-top:.2rem}
+
+    .section{margin:18px 0 26px}
+    .pub{margin: 10px 0;padding: 12px;border-left: 3px solid var(--primary);background: color-mix(in lab, var(--bg) 92%, var(--primary-weak) 8%);border-radius: 8px}
+    .pub .title{font-weight:700}
+    .pub .venue{font-style: italic;color:var(--muted)}
+    .pub .links{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.35rem}
+    .tag{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--border);font-size:.8rem;border-radius:999px;padding:.2rem .55rem;color:var(--muted)}
+
+    /* Galleries */
+    .viewer-wrap{margin-top:16px}
+    .viewer-head{text-align:center;margin:8px 0 12px}
+    .viewport{position:relative;width:100%;aspect-ratio:1/1.414;background:color-mix(in lab, var(--text) 6%, transparent);border-radius:12px;overflow:hidden;user-select:none}
+    .track{display:flex;height:100%;transition:transform 280ms ease;will-change:transform}
+    .slide{flex:0 0 100%;display:grid;place-items:center;padding:8px;background:var(--card)}
+    .slide img{max-width:100%;max-height:100%;object-fit:contain;display:block;box-shadow:0 2px 18px rgba(0,0,0,.08);border-radius:6px;background:#fff}
+    .ctrl{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:28px;line-height:46px;text-align:center;cursor:pointer;z-index:3}
+    .ctrl:hover{background:rgba(0,0,0,.7)}
+    .ctrl[disabled]{opacity:.5;cursor:not-allowed}
+    .meta-bar{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:10px;font-variant-numeric:tabular-nums;color:var(--muted)}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    /* Print styles */
+    @media print{
+      .nav, .viewer-wrap, .btn, .tag, .chip{display:none !important}
+      .card{box-shadow:none;border:none;padding:0}
+      a::after{content:" (" attr(href) ")";font-size:.9em;color:#6b7280}
+      body{background:#fff;color:#000}
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">跳到主要内容 / Skip to main</a>
+
+  <!-- Top Navigation -->
+  <header class="nav">
+    <div class="container nav-inner" role="navigation" aria-label="Primary">
+      <div class="brand">
+        <img class="avatar" id="avatar-img" src="static/assets/img/optic.png" alt="Zibo Su portrait"/>
+        <span class="lang-zh">苏子博</span>
+        <span class="lang-en">Zibo Su</span>
+        <span class="chip" id="role-chip"><span class="lang-zh">主页</span><span class="lang-en">Homepage</span></span>
+      </div>
+      <nav class="nav-links" id="site-nav">
+        <a href="#about"><span class="lang-zh">关于我</span><span class="lang-en">About</span></a>
+        <a href="#research"><span class="lang-zh">研究方向</span><span class="lang-en">Research</span></a>
+        <a href="#publications"><span class="lang-zh">论文</span><span class="lang-en">Publications</span></a>
+        <a href="#patents"><span class="lang-zh">专利/软著</span><span class="lang-en">Patents & Software</span></a>
+        <a href="#awards"><span class="lang-zh">获奖</span><span class="lang-en">Awards</span></a>
+        <a href="#contact"><span class="lang-zh">联系</span><span class="lang-en">Contact</span></a>
+        <span class="chip lang-switch">
+          <i class="bi bi-translate" aria-hidden="true"></i>
+          <button id="lang-toggle" class="lang-toggle" type="button" aria-pressed="true" style="all:unset;cursor:pointer">中文</button>
+        </span>
+        <button id="theme-toggle" class="btn" type="button" aria-label="切换主题">
+          <i class="bi bi-moon-stars"></i><span class="hide-sm">主题</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero / Summary -->
+  <section class="hero" id="main">
+    <div class="container grid">
+      <!-- Aside column -->
+      <aside class="aside card" aria-label="Profile">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+          <img class="photo" id="profile-photo" src="static/assets/img/me.jpg" alt="Zibo Su portrait"/>
+          <h2 class="lang-zh" style="margin-top:12px">苏子博</h2>
+          <h2 class="lang-en" style="margin-top:12px">Zibo Su</h2>
+          <p class="meta lang-zh">硕士研究生 · 西安电子科技大学</p>
+          <p class="meta lang-en">M.Eng. Student · Xidian University</p>
+          <div style="margin-top:12px;display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center">
+            <a class="tag" href="mailto:tk1076435968@gmail.com" title="Email Gmail"><i class="bi bi-envelope"></i> Gmail</a>
+            <a class="tag" href="mailto:tkingsu@foxmail.com" title="Email Foxmail"><i class="bi bi-envelope"></i> Foxmail</a>
+            <a class="tag" href="https://github.com/TKing-Su" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+            <a class="tag" href="https://tking-su.github.io/OrthoNet-io/" target="_blank" rel="noopener"><i class="bi bi-window"></i> OrthoNet</a>
+            <a class="tag" href="https://github.com/TKing-Su/RTPV-YOLO" target="_blank" rel="noopener"><i class="bi bi-cpu"></i> RTPV‑YOLO</a>
+          </div>
+          <button id="like-btn" class="btn like" type="button" aria-pressed="false" title="点赞支持一下">
+  <i class="bi bi-hand-thumbs-up"></i> <span id="like-count">0</span> Likes
+</button>
+        </div>
+      </aside>
+
+
+      <!-- Main column -->
+      <main>
+        <!-- About -->
+        <section id="about" class="card section">
+          <h2 class="lang-zh">关于我</h2>
+          <h2 class="lang-en">About Me</h2>
+          <div class="lang-zh">
+            <p><strong>硕士研究生</strong>（推免）：<strong>西安电子科技大学</strong> · 电子工程学院 · 电子科学与技术</p>
+            <p><strong>本科</strong>：<strong>武汉理工大学</strong> · 汽车工程学院 · 车辆工程（电子方向）</p>
+          </div>
+          <div class="lang-en">
+            <p><strong>M.Eng. student</strong> (recommended admission) at <strong>Xidian University</strong>, School of Electronic Engineering, majoring in Electronic Science and Technology.</p>
+            <p><strong>B.Eng.</strong> in Vehicle Engineering (Electronics track) from <strong>Wuhan University of Technology</strong>, School of Automotive Engineering.</p>
+          </div>
+        </section>
+
+        <!-- Research (placeholder keeps nav consistent even if empty for now) -->
+        <section id="research" class="card section" aria-labelledby="research-title">
+          <h2 id="research-title" class="lang-zh">研究方向</h2>
+          <h2 class="lang-en">Research Interests</h2>
+          <p class="lang-zh">计算机视觉：多模态生成 (语音驱动的人脸视频合成)，目标检测</p>
+          <p class="lang-en">Computer vision: Multimodal Generation (speech-driven talking face synthesis) and Object Detection.</p>
+        </section>        
+
+
+        <!-- Publications -->
+        <section id="publications" class="card section">
+          <h2 class="lang-zh">论文发表</h2>
+          <h2 class="lang-en">Publications</h2>
+
+          <article class="pub">
+            <div class="title">Outstanding Orthodontist: No More Artifactual Teeth in Talking Face</div>
+            <div class="venue">IJCAI (CCF‑A), accepted. Acceptance rate 19.3%.</div>
+            <div class="links">
+              <a class="tag" href="https://tking-su.github.io/OrthoNet-io/" target="_blank" rel="noopener"><i class="bi bi-window"></i> Project</a>
+              <button class="tag" data-bib="ortho" type="button"><i class="bi bi-clipboard"></i> BibTeX</button>
+            </div>
+          </article>
+
+          <article class="pub">
+            <div class="title">RTPV‑YOLO: Real‑time Photovoltaic Detection with UAV‑based Thermal and RGB Imaging</div>
+            <div class="venue">IEEE Transactions on Aerospace and Electronic Systems (IF 5.7; JCR Q1), accepted.</div>
+            <div class="links">
+              <a class="tag" href="https://github.com/TKing-Su/RTPV-YOLO" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+              <button class="tag" data-bib="rtpv" type="button"><i class="bi bi-clipboard"></i> BibTeX</button>
+            </div>
+          </article>
+
+          <article class="pub">
+            <div class="title">A Bridge from Audio to Video: Phoneme‑Viseme Alignment Allows Every Face to Speak Multiple Languages</div>
+            <div class="venue">AAAI (CCF‑A), under review.</div>
+            <div class="links">
+              <button class="tag" data-bib="pva" type="button"><i class="bi bi-clipboard"></i> BibTeX</button>
+            </div>
+          </article>
+
+          <!-- Paper Covers Gallery -->
+          <div class="viewer-wrap">
+            <h3 class="viewer-head"><span class="lang-zh">论文封面展示</span><span class="lang-en">Paper Covers</span></h3>
+            <div class="viewport" id="pp-viewport" aria-live="polite">
+              <div class="track" id="pp-track"></div>
+              <button class="ctrl" id="pp-prev" aria-label="Prev" type="button">‹</button>
+              <button class="ctrl" id="pp-next" aria-label="Next" type="button">›</button>
+            </div>
+            <div class="meta-bar"><span id="pp-counter">1 / 2</span></div>
+          </div>
+        </section>
+
+        <!-- Patents & Software -->
+        <section id="patents" class="card section">
+          <h2 class="lang-zh">发明专利与软件著作（节选）</h2>
+          <h2 class="lang-en">Patents & Software (selected)</h2>
+          
+          
+          <div class="lang-zh"><ul>
+            <li>CN114655361A 智能浮标、海上巡航的无人机集群化控制管理系统和方法（已授权，学生一作）</li>
+            <li>CN117391543B 轨迹数据生成的海上航路网络质量评价方法及系统（已授权，四作）</li>
+            <li>CN116797206A 基于无人机的光伏巡检清洁方法和系统（公开实审中，学生一作）</li>
+            <li>CN119083395A 河流内垃圾与油污的回收系统（公开实审中，学生一作）</li>
+            <li>202510802515.1 语音驱动人脸视频生成的牙齿区域增强方法及装置（受理中，学生一作）</li>
+            <li>软件著作：无人机最优路径规划、燃烧传热模型求解、无人机‑艇协同水质检测可视化、光伏巡检数据可视化、数字人三维面部重建、多语言多模态数字人视频生成、条件扩散模型 AI 换装等。</li>
+          </ul>
+          </div>
+
+          <div class="lang-en">
+            <ul>
+              <li>CN114655361A Intelligent buoy and UAV swarm control & management system for maritime patrol (granted, student first author).</li>
+              <li>CN117391543B Method and system for evaluating quality of maritime route networks from trajectory data (granted, 4th author).</li>
+              <li>CN116797206A UAV-based photovoltaic inspection and cleaning method and system (under substantive examination, student first author).</li>
+              <li>CN119083395A River trash and oil recovery system (under substantive examination, student first author).</li>
+              <li>202510802515.1 Teeth-region enhancement method and device for speech-driven talking head generation (application filed, student first author).</li>
+              <li>Software copyrights: UAV optimal path planning; combustion heat-transfer solver; UAV–boat collaborative water quality visualization; PV inspection data visualization; 3D facial reconstruction for digital humans; multilingual multimodal digital human video generation; conditional-diffusion-based AI outfit transfer, etc.</li>
+            </ul>
+          </div>
+
+
+          <!-- Patents Gallery -->
+          <div class="viewer-wrap">
+            <h3 class="viewer-head lang-zh">专利展示</h3>
+            <h3 class="viewer-head lang-en">Patents</h3>
+            <div class="viewport" id="pv-viewport" aria-live="polite">
+              <div class="track" id="pv-track"></div>
+              <button class="ctrl" id="pv-prev" aria-label="Prev" type="button">‹</button>
+              <button class="ctrl" id="pv-next" aria-label="Next" type="button">›</button>
+            </div>
+            <div class="meta-bar"><span id="pv-counter">1 / 1</span></div>
+          </div>
+
+          <!-- Software Gallery -->
+          <div class="viewer-wrap">
+            <h3 class="viewer-head lang-zh">软件著作权展示</h3>
+            <h3 class="viewer-head lang-en">Software</h3>
+            <div class="viewport" id="sv-viewport" aria-live="polite">
+              <div class="track" id="sv-track"></div>
+              <button class="ctrl" id="sv-prev" aria-label="Prev" type="button">‹</button>
+              <button class="ctrl" id="sv-next" aria-label="Next" type="button">›</button>
+            </div>
+            <div class="meta-bar"><span id="sv-counter">1 / 1</span></div>
+          </div>
+        </section>
+
+        <!-- Awards -->
+        <section id="awards" class="card section">
+          <h2 class="lang-zh">竞赛获奖（节选）</h2>
+          <h2 class="lang-en">Awards (selected)</h2>
+          
+          
+          <div class="lang-zh"><ul>
+            <li>全国大学生交通运输科技大赛 三等奖</li>
+            <li>全国大学生节能减排社会实践与科技竞赛 二等奖</li>
+            <li>中国国际大学生创新大赛（“互联网+”）湖北省复赛 银奖</li>
+            <li>湖北省“挑战杯” 大学生竞赛 金奖</li>
+            <li>“创青春”中国青年创新创业大赛 铜奖</li>
+          </ul>
+          </div>
+
+          <div class="lang-en">
+            <ul>
+              <li>National Undergraduate Transportation Science & Technology Competition — Third Prize.</li>
+              <li>National Undergraduate Energy Conservation & Emission Reduction Competition — Second Prize.</li>
+              <li>China International College Students’ Innovation Competition (“Internet+”), Hubei Provincial Round — Silver Award.</li>
+              <li>“Challenge Cup” College Student Competition (Hubei Province) — Gold Award.</li>
+              <li>“Create Youth” China Youth Innovation & Entrepreneurship Competition — Bronze Award.</li>
+            </ul>
+          </div>
+
+
+          <!-- Awards / Certificates Gallery -->
+          <div class="viewer-wrap">
+            <h3 class="viewer-head"><span class="lang-zh">获奖证书展示</span><span class="lang-en">Awards & Certificates</span></h3>
+            <div class="viewport" id="av-viewport" aria-live="polite">
+              <div class="track" id="av-track"></div>
+              <button class="ctrl" id="av-prev" aria-label="Prev" type="button">‹</button>
+              <button class="ctrl" id="av-next" aria-label="Next" type="button">›</button>
+            </div>
+            <div class="meta-bar">
+              <span id="av-counter">1 / 1</span>
+              <span id="av-caption" class="av-caption"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="card section">
+          <h2 class="lang-zh">联系方式</h2>
+          <h2 class="lang-en">Contact</h2>
+          <ul class="list-unstyled">
+            <li class="kv"><i class="bi bi-envelope"></i> <a href="mailto:tk1076435968@gmail.com">tk1076435968@gmail.com</a> / <a href="mailto:tkingsu@foxmail.com">tkingsu@foxmail.com</a></li>
+            <li class="kv"><i class="bi bi-telephone"></i> +86‑19995410862</li>
+            <li class="kv"><i class="bi bi-geo-alt"></i> 陕西省西安市雁塔区 · 西安电子科技大学</li>
+            <li class="kv"><i class="bi bi-github"></i> <a href="https://github.com/TKing-Su" target="_blank" rel="noopener">@TKing‑Su</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div>
+        © <span id="year"></span> Zibo Su · <a href="https://github.com/TKing-Su" target="_blank" rel="noopener">GitHub</a>
+      </div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <span class="chip">Last updated: <span id="updated"></span></span>
+        <a class="chip" href="https://github.com/senli1073/senli1073.github.io/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JSON-LD schema for a Person (helps SEO/Google Scholar) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Zibo Su",
+    "image": "static/assets/img/optic.png",
+    "jobTitle": "M.Eng. Student",
+    "affiliation": {"@type":"Organization","name":"Xidian University"},
+    "url": "",
+    "email": "mailto:tk1076435968@gmail.com",
+    "sameAs": [
+      "https://github.com/TKing-Su",
+      "https://tking-su.github.io/OrthoNet-io/"
+    ]
+  }
+  </script>
+
+  <!-- Scripts: theme & language toggle + BibTeX copy + dates + active section highlight + galleries -->
+  <script type="module">
+    // Persisted theme
+    const root = document.documentElement;
+    const storedTheme = localStorage.getItem('theme');
+    if(storedTheme){ root.setAttribute('data-theme', storedTheme); }
+
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+
+    // Language toggle (button, more accessible)
+    const setLang = (lang) => {
+      document.querySelectorAll('.lang-zh').forEach(el => el.style.display = (lang==='zh' ? 'block' : 'none'));
+      document.querySelectorAll('.lang-en').forEach(el => el.style.display = (lang==='en' ? 'block' : 'none'));
+      const btn = document.getElementById('lang-toggle');
+      btn.textContent = (lang==='zh' ? '中文' : 'EN');
+      btn.setAttribute('aria-pressed', lang==='zh' ? 'true' : 'false');
+      localStorage.setItem('site-lang', lang);
+    
+
+      // Also update alt text for images
+      const avatarImg = document.querySelector('#avatar-img') || document.querySelector('.avatar');
+      const profilePhoto = document.querySelector('#profile-photo') || document.querySelector('.photo');
+      if (avatarImg) { avatarImg.alt = (lang === 'zh' ? '苏子博 头像' : 'Zibo Su avatar'); }
+      if (profilePhoto) { profilePhoto.alt = (lang === 'zh' ? '苏子博 肖像' : 'Zibo Su portrait'); }
+    
+};
+    const savedLang = localStorage.getItem('site-lang') || 'zh';
+    setLang(savedLang);
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      const cur = localStorage.getItem('site-lang') || 'zh';
+      setLang(cur === 'zh' ? 'en' : 'zh');
+    });
+
+    // Footer dates
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('updated').textContent = new Date().toISOString().slice(0,10);
+
+    // BibTeX copy
+    const bibs = {
+      ortho: `@inproceedings{su2025orthonet,
+  title={Outstanding Orthodontist: No More Artifactual Teeth in Talking Face},
+  author={Su, Zibo and Others},
+  booktitle={IJCAI},
+  year={2025}
+}`,
+      rtpv: `@article{su2025rtpv,
+  title={RTPV-YOLO: Real-time Photovoltaic Detection with UAV-based Thermal and RGB Imaging},
+  author={Su, Zibo and Others},
+  journal={IEEE Transactions on Aerospace and Electronic Systems},
+  year={2025}
+}`,
+      pva: `@inproceedings{su2025pva,
+  title={A Bridge from Audio to Video: Phoneme-Viseme Alignment Allows Every Face to Speak Multiple Languages},
+  author={Su, Zibo and Others},
+  booktitle={AAAI},
+  year={2025}
+}`
+    };
+    document.querySelectorAll('[data-bib]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.getAttribute('data-bib');
+        navigator.clipboard.writeText(bibs[key]).then(() => {
+          btn.textContent = 'Copied ✓'; setTimeout(() => { btn.textContent = 'BibTeX'; }, 1200);
+        });
+      });
+    });
+
+    // Active section highlight
+    const navLinks = Array.from(document.querySelectorAll('#site-nav a[href^="#"]'));
+    const sections = navLinks.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const id = '#' + e.target.id;
+        const link = navLinks.find(a => a.getAttribute('href') === id);
+        if(link){
+          if(e.isIntersecting){ navLinks.forEach(l => l.classList.remove('active')); link.classList.add('active'); }
+        }
+      });
+    }, { rootMargin: "0px 0px -60% 0px", threshold: 0.25 });
+    sections.forEach(sec => io.observe(sec));
+
+    
+    // Like button feature
+    const likeBtn = document.getElementById('like-btn');
+    const likeCount = document.getElementById('like-count');
+    let count = parseInt(localStorage.getItem('like-count') || '0', 10);
+    let liked = localStorage.getItem('liked') === 'true';
+    likeCount.textContent = count;
+    if(liked){ likeBtn.classList.add('btn--liked'); likeBtn.setAttribute('aria-pressed','true'); }
+
+    function spawnBubble(text){
+      const b = document.createElement('span');
+      b.className = 'like-bubble';
+      b.textContent = text;
+      likeBtn.appendChild(b);
+      const remove = () => b.remove();
+      b.addEventListener('animationend', remove);
+      setTimeout(remove, 900);
+    }
+
+    likeBtn.addEventListener('click', () => {
+      liked = !liked;
+      likeBtn.classList.toggle('btn--liked', liked);
+      likeBtn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+      if(liked){ count += 1; spawnBubble('+1'); }
+      else { count = Math.max(0, count - 1); spawnBubble('-1'); }
+      likeCount.textContent = count;
+      localStorage.setItem('like-count', String(count));
+      localStorage.setItem('liked', liked ? 'true' : 'false');
+    });
+
+    // --- Generic carousel factory to reduce duplicate code ---
+    function setupCarousel({viewportId, trackId, prevId, nextId, counterId, total, path, prefix, ext, startIndex=1, orientationByIndex}){
+      const viewport = document.getElementById(viewportId);
+      const track = document.getElementById(trackId);
+      if(!viewport || !track) return;
+      const btnPrev = document.getElementById(prevId);
+      const btnNext = document.getElementById(nextId);
+      const counter = document.getElementById(counterId);
+      const frag = document.createDocumentFragment();
+
+      let idx = Math.min(Math.max(startIndex,1), total) - 1;
+      for(let i=1;i<=total;i++){
+        const s=document.createElement('div');s.className='slide';
+        const img=document.createElement('img');img.loading='lazy';
+        img.alt = (prefix || 'item') + ' ' + i;
+        img.src = `${path}/${prefix}${i}.${ext}`;
+        s.appendChild(img);frag.appendChild(s);
+      }
+      track.classList.add('track'); viewport.classList.add('viewport');
+      track.appendChild(frag);
+
+      const update=()=>{
+        track.style.transform=`translateX(${-idx*100}%)`;
+        if(counter) counter.textContent=`${idx+1} / ${total}`;
+        btnPrev.disabled=(idx===0); btnNext.disabled=(idx===total-1);
+        if(orientationByIndex){
+          const o = orientationByIndex(idx);
+          viewport.style.aspectRatio = (o==='landscape') ? '1.414 / 1' : '1 / 1.414';
+        }
+      };
+      const goTo=i=>{idx=Math.max(0,Math.min(total-1,i));update()};
+      const next=()=>goTo(idx+1), prev=()=>goTo(idx-1);
+      update();
+
+      btnPrev.addEventListener('click',prev);
+      btnNext.addEventListener('click',next);
+      window.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')prev(); else if(e.key==='ArrowRight')next() });
+
+      // Drag
+      let startX=0,currentX=0,drag=false,last=0,th=40;
+      const start=c=>{drag=true;startX=currentX=c;last=-idx*track.clientWidth;track.classList.add('dragging');viewport.classList.add('grabbing')};
+      const move=c=>{if(!drag)return;currentX=c;const d=currentX-startX;track.style.transform=`translateX(${last+d}px)`};
+      const end=()=>{if(!drag)return;drag=false;const d=currentX-startX;track.classList.remove('dragging');viewport.classList.remove('grabbing');Math.abs(d)>th?(d<0?next():prev()):update()};
+      track.addEventListener('touchstart',e=>start(e.touches[0].clientX),{passive:true});
+      track.addEventListener('touchmove',e=>move(e.touches[0].clientX),{passive:true});
+      track.addEventListener('touchend',end);
+      track.addEventListener('mousedown',e=>start(e.clientX));
+      window.addEventListener('mousemove',e=>move(e.clientX));
+      window.addEventListener('mouseup',end);
+      window.addEventListener('resize',update);
+    }
+
+    // Paper covers
+    setupCarousel({
+      viewportId: 'pp-viewport',
+      trackId: 'pp-track',
+      prevId: 'pp-prev',
+      nextId: 'pp-next',
+      counterId: 'pp-counter',
+      total: 2, path: 'images/paper', prefix: 'paper', ext: 'png', startIndex: 1
+    });
+
+    // Patents
+    setupCarousel({
+      viewportId: 'pv-viewport',
+      trackId: 'pv-track',
+      prevId: 'pv-prev',
+      nextId: 'pv-next',
+      counterId: 'pv-counter',
+      total: 10, path: 'images/patent', prefix: 'patent', ext: 'png', startIndex: 1
+    });
+
+    // Software
+    setupCarousel({
+      viewportId: 'sv-viewport',
+      trackId: 'sv-track',
+      prevId: 'sv-prev',
+      nextId: 'sv-next',
+      counterId: 'sv-counter',
+      total: 7, path: 'images/software', prefix: 'soft', ext: 'png', startIndex: 1
+    });
+
+    // Awards: custom list with varying orientation
+    (function(){
+      const files = [
+        { src: 'award_landscape1.png', orientation: 'landscape' },
+        { src: 'award_landscape2.png', orientation: 'landscape' },
+        { src: 'award_landscape3.png', orientation: 'landscape' },
+        { src: 'award_portrait1.png', orientation: 'portrait' },
+        { src: 'award_portrait2.png', orientation: 'portrait' },
+        { src: 'award_portrait3.png', orientation: 'portrait' },
+        { src: 'award_portrait4.png', orientation: 'portrait' }
+      ];
+      const viewport = document.getElementById('av-viewport');
+      const track = document.getElementById('av-track');
+      if(!viewport || !track) return;
+      const btnPrev = document.getElementById('av-prev');
+      const btnNext = document.getElementById('av-next');
+      const counter = document.getElementById('av-counter');
+      const caption = document.getElementById('av-caption');
+
+      let idx = 0;
+      const total = files.length;
+      const frag = document.createDocumentFragment();
+      files.forEach((f,i)=>{
+        const s = document.createElement('div'); s.className='slide';
+        const img = document.createElement('img'); img.loading='lazy';
+        img.src = f.src.includes('/') ? f.src : `images/awards/${f.src}`;
+        img.alt = f.title ? f.title : `Award ${i+1}`;
+        s.appendChild(img); frag.appendChild(s);
+      });
+      track.appendChild(frag);
+
+      function setAspect(i){const o=files[i].orientation;viewport.style.aspectRatio = (o==='landscape') ? '1.414 / 1' : '1 / 1.414'}
+      function update(){ setAspect(idx); track.style.transform=`translateX(${-idx*100}%)`; counter.textContent=`${idx+1} / ${total}`; caption.textContent=files[idx].title?files[idx].title:''; btnPrev.disabled=(idx===0); btnNext.disabled=(idx===total-1); }
+      const next=()=>{ idx=Math.min(total-1, idx+1); update(); }
+      const prev=()=>{ idx=Math.max(0, idx-1); update(); }
+      update();
+
+      btnPrev.addEventListener('click',prev); btnNext.addEventListener('click',next);
+      window.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')prev(); else if(e.key==='ArrowRight')next() });
+
+      // Drag
+      let startX=0,currentX=0,drag=false,last=0,th=40;
+      const start=c=>{drag=true;startX=currentX=c;last=-idx*track.clientWidth;track.classList.add('dragging');viewport.classList.add('grabbing')};
+      const move=c=>{if(!drag)return;currentX=c;const d=currentX-startX;track.style.transform=`translateX(${last+d}px)`};
+      const end=()=>{if(!drag)return;drag=false;const d=currentX-startX;track.classList.remove('dragging');viewport.classList.remove('grabbing');Math.abs(d)>th?(d<0?next():prev()):update()};
+      track.addEventListener('touchstart',e=>start(e.touches[0].clientX),{passive:true});
+      track.addEventListener('touchmove',e=>move(e.touches[0].clientX),{passive:true});
+      track.addEventListener('touchend',end);
+      track.addEventListener('mousedown',e=>start(e.clientX));
+      window.addEventListener('mousemove',e=>move(e.clientX));
+      window.addEventListener('mouseup',end);
+      window.addEventListener('resize',update);
+    })();
+  </script>
+
+  <!-- Bootstrap Icons (kept at the end to avoid blocking rendering) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+</body>
+</html>
